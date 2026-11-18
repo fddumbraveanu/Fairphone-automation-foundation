@@ -14,10 +14,23 @@ playwright install chromium
 pytest -m smoke --headed          # smoke suite, visible browser
 pytest -m scan --tracing off      # weekly page scan
 ```
+## Project structure
+
+- `conftest.py`: shared fixtures (target URL, language, browser settings,
+  cookie banner). Every test gets these automatically.
+- `helpers/`: plain functions without a browser (sitemap parsing, sampling).
+- `tests/smoke/`: pre-deploy journeys, marked `@pytest.mark.smoke`.
+- `tests/detection/`: the weekly scan, marked `@pytest.mark.scan`.
+- `docs/`: QA strategy, refinement and go/no-go documents.
+
+To add a smoke test: create `tests/smoke/test_<name>.py`, mark it
+`@pytest.mark.smoke`, and use the `page` and `language` fixtures. It runs in
+the PR gate automatically.
 
 Configuration (environment variables, all optional):
 - `BASE_URL`: target shop, default `https://www.fairphone.com`
-- `LANGUAGE`: shop language, default `en` (also `nl`, `de`, `fr`)
+- `LANGUAGE`: shop language, default `en` (also `nl`, `de`; see Known 
+  limitations for `fr`)
 
 ## What each workflow does
 
@@ -49,8 +62,8 @@ merge, and each needs an owner and a ticket. `--strict-markers` turns a typo'd
 marker into an error, so a test cannot silently drop out of the gate.
 - **What fails the scan, and what is only reported.** A sampled page returning
 400+ fails the job: the sitemap promises the page exists. Console errors and
-failing resources are reported but do not fail it, as those tend to be ignored
-long term.
+failing resources are reported but do not fail it: they are often third-party,
+and a job that is always red gets ignored.
 - **How the scan samples.** 25 pages a week, chosen with a seed based on the week
 number. The sample is identical all week, so a finding can be reproduced, and
 rotates weekly, covering the ~1,670 sitemap URLs in a little over a year.
@@ -83,12 +96,24 @@ Observations relevant to automation:
   German, and fails in French at the "Shop" hover.
 - Desktop only: the hover menu has no mobile equivalent in these tests.
 - Chromium only, no WebKit or Firefox yet.
+- On acceptance, the sitemap’s absolute production URLs would need rewriting 
+  to BASE_URL.
 
 ## What I left out, and what I would do with another day
 
+- Smoke journeys 2–4 (add a phone to the cart, change quantity and remove,
+  checkout to the address step). I prioritised a working foundation, both
+  workflows and the strategy documents over half-finished journeys. The
+  fixtures, configuration and CI are in place, so the journeys can be added
+  on top as page objects for the product, cart and checkout pages.
 - WebKit and mobile-viewport runs.
 - `data-testid` attributes on key elements, agreed with the developers, to make
   the suite language-independent.
+- Next scan check: on sampled `/shop/` product pages, check that a price is
+  shown and "Add to cart" is enabled. It is cheap to run, and it catches the
+  most costly silent failure: a product page that loads fine but cannot be
+  bought.
+
 
 ## What was new to me
 
