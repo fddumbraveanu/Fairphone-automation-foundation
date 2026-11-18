@@ -33,8 +33,7 @@ jobs:
 
       - name: Show findings on the run page
         if: always()
-        run: cat reports/scan-findings.md >> "$GITHUB_STEP_SUMMARY"
-
+        run: cat reports/scan-findings.md >> "$GITHUB_STEP_SUMMARY" || echo "No findings report was written; see the test step." >> "$GITHUB_STEP_SUMMARY"
       - name: Upload report and findings
         if: always()
         uses: actions/upload-artifact@v6
