@@ -14,7 +14,7 @@ def base_url(pytestconfig) -> str:
 
 @pytest.fixture(scope="session")
 def language() -> str:
-    return os.getenv("LANGUAGE", DEFAULT_LANGUAGE)
+    return os.getenv("LANGUAGE") or DEFAULT_LANGUAGE
 
 @pytest.fixture
 def browser_context_args(browser_context_args):
