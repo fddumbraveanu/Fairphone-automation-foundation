@@ -19,7 +19,7 @@ jobs:
       BASE_URL: ${{ vars.BASE_URL }}
       LANGUAGE: ${{ vars.LANGUAGE }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
         with:
@@ -36,7 +36,7 @@ jobs:
 
       - name: Upload report and traces
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: smoke-results
           path: |
